@@ -20,3 +20,10 @@ func TestFoo(t *testing.T) {
 	assert.NoError(t, err)
 
 }
+
+func TestGetBuildID(t *testing.T) {
+	folder := "/tmp/fabric-ip-register-cc-ea2aaf81f5d991a883563c349e793ef0a642d577ceebb9a6778832c7fca23882425116466/bld"
+	buildID, err := getBuildID(folder)
+	assert.NoError(t, err)
+	assert.Len(t, buildID, 10)
+}

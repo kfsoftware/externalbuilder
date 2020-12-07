@@ -106,7 +106,7 @@ func getProcedureFromArg(procs map[string]Procedure) Procedure {
 
 // Config defines the configuration for the Kubernetes chaincode builder and launcher
 type Config struct {
-	Images         map[string]string `yaml:"images"` // map[technology]image
+	Images map[string]string `yaml:"images"` // map[technology]image
 
 	Builder struct {
 		Resources struct {
@@ -319,22 +319,24 @@ func getKubernetesClientset() (*kubernetes.Clientset, error) {
 }
 
 func getBuildID(sourceDir string) (string, error) {
-	d := filepath.Base(filepath.Dir(sourceDir))
-	chunks := strings.Split(d, "-")
-	if len(chunks) != 3 {
-		return "", errors.Errorf("Folder name %s doesn't contain 2 a package ID", d)
+	folderName := filepath.Base(filepath.Dir(sourceDir))
+	chunks := strings.Split(folderName, "-")
+	log.Printf("Directory %s", folderName)
+	lastChunk := chunks[len(chunks)-1]
+	if len(lastChunk) < 10 {
+		return lastChunk, nil
 	}
-	log.Printf("Directory %s, %s", d, chunks[2][:10])
-	return chunks[2][:10], nil
+	return lastChunk[:10], nil
 }
 func getBuildIDForRun(sourceDir string) (string, error) {
-	d := filepath.Base(filepath.Dir(sourceDir))
-	chunks := strings.Split(d, "-")
-	if len(chunks) != 2 {
-		return "", errors.Errorf("Folder name %s doesn't contain 2 a package ID", d)
+	folderName := filepath.Base(filepath.Dir(sourceDir))
+	chunks := strings.Split(folderName, "-")
+	log.Printf("Directory %s", folderName)
+	lastChunk := chunks[len(chunks)-1]
+	if len(lastChunk) < 10 {
+		return lastChunk, nil
 	}
-	log.Printf("Directory %s, %s", d, chunks[1][:10])
-	return chunks[1][:10], nil
+	return lastChunk[:10], nil
 }
 
 func TempFileName(prefix, suffix string) string {
