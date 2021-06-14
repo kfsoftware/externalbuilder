@@ -32,4 +32,4 @@ jobs:
         with:
           file: ./images/fabric-peer/${{matrix.hlf-version}}/Dockerfile
           push: true
-          tags: kfsoftware/fabric-peer:amd64-${{matrix.hlf-version}}
+          tags: quay.io/kfsoftware/fabric-peer:amd64-${{matrix.hlf-version}}
