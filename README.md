@@ -53,7 +53,7 @@ docker push quay.io/kfsoftware/fabric-fs:amd64-2.2.0
 
 Inside the **core.yaml** of the peer, under chaincode, there's a property called ``externalBuilders```.
 
-If using the the image provided by this project, the contents of ```externalBuilders``` is the following:
+If using the the image provided by this project, the contents of ```externalBuilders``` are the following:
 ```yaml
 - name: k8s-builder
   path: /builders/golang
@@ -70,6 +70,7 @@ If using the the image provided by this project, the contents of ```externalBuil
     - EXTERNAL_BUILDER_HTTP_PROXY
     - EXTERNAL_BUILDER_HTTPS_PROXY
     - EXTERNAL_BUILDER_NO_PROXY
+    - EXTERNAL_BUILDER_PEER_URL
 
 ```
 

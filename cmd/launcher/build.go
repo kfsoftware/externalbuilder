@@ -268,7 +268,7 @@ func createBuilderPod(ctx context.Context, cfg Config, metadata *ChaincodeMetada
 				{
 					Name:            "builder",
 					Image:           image,
-					ImagePullPolicy: apiv1.PullAlways,
+					ImagePullPolicy: apiv1.PullIfNotPresent,
 					Command: []string{
 						"/bin/sh",
 					},
@@ -282,10 +282,11 @@ func createBuilderPod(ctx context.Context, cfg Config, metadata *ChaincodeMetada
 			},
 			Containers: []apiv1.Container{
 				{
-					Name:         "upload-chaincode-output",
-					Image:        initImage,
-					VolumeMounts: mounts,
-					Command:      []string{"/bin/bash"},
+					Name:            "upload-chaincode-output",
+					Image:           initImage,
+					ImagePullPolicy: apiv1.PullIfNotPresent,
+					VolumeMounts:    mounts,
+					Command:         []string{"/bin/bash"},
 					Args: []string{
 						"-c",
 						//"sleep 600000",

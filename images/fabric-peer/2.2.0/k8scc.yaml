@@ -8,7 +8,7 @@ builder:
   resources:
     memory_limit: "0.5G"
     cpu_limit: "0.2"
-  env: []
+  env: [ ]
 launcher:
   resources:
     memory_limit: "0.5G"

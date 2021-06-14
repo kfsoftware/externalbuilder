@@ -41,42 +41,6 @@ func Run(ctx context.Context, cfg Config) error {
 		return errors.Wrap(err, "getting run config for chaincode")
 	}
 
-	// Create transfer dir
-	//copyOpts := cpy.Options{AddPermission: os.ModePerm}
-
-	//prefix, _ := os.Hostname()
-	//transferdir, err := ioutil.TempDir(cfg.TransferVolume.Path, prefix)
-	//if err != nil {
-	//	return errors.Wrap(err, fmt.Sprintf("creating directory %s on transfer volume", cfg.TransferVolume.Path))
-	//}
-	//defer os.RemoveAll(transferdir)
-	//
-	//// Setup transfer
-	//transferOutput := filepath.Join(transferdir, "output")
-	//transferArtifacts := filepath.Join(transferdir, "artifacts")
-	//
-	//// Copy outputDir to transfer PV
-	//err = cpy.Copy(outputDir, transferOutput, copyOpts)
-	//if err != nil {
-	//	return errors.Wrap(err, "copy output dir to transfer dir")
-	//}
-	//
-	//// Create artifacts dir on transfer PV
-	//err = os.Mkdir(transferArtifacts, os.ModePerm) // Apply full permissions, but this is before umask
-	//if err != nil {
-	//	return errors.Wrap(err, "create artifacts dir in the transfer dir")
-	//}
-	//err = os.Chmod(transferArtifacts, os.ModePerm)
-	//if err != nil {
-	//	return errors.Wrap(err, "chmod on artifacts dir in the transfer dir")
-	//}
-	//
-	//// Create artifacts
-	//err = createArtifacts(runConfig, transferArtifacts)
-	//if err != nil {
-	//	return errors.Wrap(err, "creating artifacts")
-	//}
-
 	// Create chaincode pod
 	pod, err := createChaincodePod(
 		ctx,
@@ -102,70 +66,6 @@ func Run(ctx context.Context, cfg Config) error {
 	return nil
 }
 
-func createArtifacts(c *ChaincodeRunConfig, dir string) error {
-	clientCertPath := filepath.Join(dir, "client.crt")
-	clientKeyPath := filepath.Join(dir, "client.key")
-	clientCertFile := filepath.Join(dir, "client_pem.crt")
-	clientKeyFile := filepath.Join(dir, "client_pem.key")
-	peerCertFile := filepath.Join(dir, "root.crt")
-
-	// Create cert files
-	err := ioutil.WriteFile(clientCertFile, []byte(c.ClientCert), os.ModePerm)
-	if err != nil {
-		return errors.Wrap(err, "writing client cert pem file")
-	}
-
-	err = ioutil.WriteFile(clientKeyFile, []byte(c.ClientKey), os.ModePerm)
-	if err != nil {
-		return errors.Wrap(err, "writing client key pem file")
-	}
-
-	err = ioutil.WriteFile(peerCertFile, []byte(c.RootCert), os.ModePerm)
-	if err != nil {
-		return errors.Wrap(err, "writing peer cert file")
-	}
-
-	// Create weird cert files (used by node platform)
-	// https://github.com/hyperledger/fabric/blob/v2.1.1/core/container/dockercontroller/dockercontroller.go#L319
-	err = ioutil.WriteFile(clientCertPath, []byte(base64.StdEncoding.EncodeToString([]byte(c.ClientCert))), os.ModePerm)
-	if err != nil {
-		return errors.Wrap(err, "writing client cert file")
-	}
-
-	err = ioutil.WriteFile(clientKeyPath, []byte(base64.StdEncoding.EncodeToString([]byte(c.ClientKey))), os.ModePerm)
-	if err != nil {
-		return errors.Wrap(err, "writing client key file")
-	}
-
-	// Change permissions
-	err = os.Chmod(clientCertFile, os.ModePerm)
-	if err != nil {
-		return errors.Wrap(err, "changing client cert pem file permissions")
-	}
-
-	err = os.Chmod(clientKeyFile, os.ModePerm)
-	if err != nil {
-		return errors.Wrap(err, "changing client key pem file permissions")
-	}
-
-	err = os.Chmod(clientCertPath, os.ModePerm)
-	if err != nil {
-		return errors.Wrap(err, "changing client key file permissions")
-	}
-
-	err = os.Chmod(clientKeyPath, os.ModePerm)
-	if err != nil {
-		return errors.Wrap(err, "changing client key file permissions")
-	}
-
-	err = os.Chmod(peerCertFile, os.ModePerm)
-	if err != nil {
-		return errors.Wrap(err, "changing peer cert file permissions")
-	}
-
-	return nil
-}
-
 func getChaincodeRunConfig(metadataDir string, outputDir string) (*ChaincodeRunConfig, error) {
 	// Read chaincode.json
 	metadataFile := filepath.Join(metadataDir, "chaincode.json")
@@ -179,7 +79,10 @@ func getChaincodeRunConfig(metadataDir string, outputDir string) (*ChaincodeRunC
 	if err != nil {
 		return nil, errors.Wrap(err, "Unmarshaling chaincode.json")
 	}
-
+	peerUrl, found := os.LookupEnv("EXTERNAL_BUILDER_PEER_URL")
+	if found {
+		metadata.PeerAddress = peerUrl
+	}
 	// Create shortname
 	parts := strings.SplitN(metadata.CCID, ":", 2)
 	if len(parts) != 2 {
@@ -338,7 +241,7 @@ EOF_5
 				{
 					Name:            "chaincode",
 					Image:           runConfig.Image,
-					ImagePullPolicy: apiv1.PullAlways,
+					ImagePullPolicy: apiv1.PullIfNotPresent,
 					Env: []apiv1.EnvVar{
 						{
 							Name:  "CORE_CHAINCODE_ID_NAME",
@@ -387,24 +290,6 @@ EOF_5
 							MountPath: GetCCMountDir(runConfig.Platform),
 							SubPath:   "output",
 						},
-						//- name: chaincode
-						//mountPath: /chaincode/artifacts
-						//subPath: artifacts
-						//- name: chaincode
-						//mountPath: /usr/local/src
-						//subPath: output
-						//{
-						//	Name:      "transfer-pv",
-						//	MountPath: "/chaincode/artifacts/",
-						//	SubPath:   transferPVPrefix + "/artifacts/",
-						//	ReadOnly:  true,
-						//},
-						//{
-						//	Name:      "transfer-pv",
-						//	MountPath: GetCCMountDir(runConfig.Platform),
-						//	SubPath:   transferPVPrefix + "/output/",
-						//	ReadOnly:  true,
-						//},
 					},
 				},
 			},
