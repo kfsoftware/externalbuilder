@@ -148,6 +148,13 @@ func createChaincodePod(
 	if limit := cfg.Launcher.Resources.LimitCPU; limit != "" {
 		limits["cpu"] = resource.MustParse(limit)
 	}
+	requests := apiv1.ResourceList{}
+	if request := cfg.Launcher.Resources.RequestsMemory; request != "" {
+		requests["memory"] = resource.MustParse(request)
+	}
+	if request := cfg.Launcher.Resources.RequestsCPU; request != "" {
+		requests["cpu"] = resource.MustParse(request)
+	}
 
 	// Configuration
 	hasTLS := "true"
@@ -278,7 +285,7 @@ EOF_5
 					},
 					WorkingDir: GetCCMountDir(runConfig.Platform), // Set the CWD to the path where the chaincode is
 					Command:    GetRunArgs(runConfig.Platform, runConfig.PeerAddress),
-					Resources:  apiv1.ResourceRequirements{Limits: limits},
+					Resources:  apiv1.ResourceRequirements{Limits: limits, Requests: requests},
 					VolumeMounts: []apiv1.VolumeMount{
 						{
 							Name:      "chaincode",

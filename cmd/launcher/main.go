@@ -110,8 +110,10 @@ type Config struct {
 
 	Builder struct {
 		Resources struct {
-			LimitMemory string `yaml:"memory_limit"`
-			LimitCPU    string `yaml:"cpu_limit"`
+			LimitMemory    string `yaml:"memory_limit"`
+			LimitCPU       string `yaml:"cpu_limit"`
+			RequestsMemory string `yaml:"memory_requests"`
+			RequestsCPU    string `yaml:"cpu_requests"`
 		} `yaml:"resources"`
 		Env []struct {
 			Name  string `yaml:"name"`
@@ -121,8 +123,10 @@ type Config struct {
 
 	Launcher struct {
 		Resources struct {
-			LimitMemory string `yaml:"memory_limit"`
-			LimitCPU    string `yaml:"cpu_limit"`
+			LimitMemory    string `yaml:"memory_limit"`
+			LimitCPU       string `yaml:"cpu_limit"`
+			RequestsMemory string `yaml:"memory_requests"`
+			RequestsCPU    string `yaml:"cpu_requests"`
 		} `yaml:"resources"`
 	} `yaml:"launcher"`
 

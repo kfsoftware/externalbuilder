@@ -215,6 +215,13 @@ func createBuilderPod(ctx context.Context, cfg Config, metadata *ChaincodeMetada
 	if limit := cfg.Builder.Resources.LimitCPU; limit != "" {
 		limits["cpu"] = resource.MustParse(limit)
 	}
+	requests := apiv1.ResourceList{}
+	if request := cfg.Builder.Resources.RequestsMemory; request != "" {
+		requests["memory"] = resource.MustParse(request)
+	}
+	if request := cfg.Builder.Resources.RequestsCPU; request != "" {
+		requests["cpu"] = resource.MustParse(request)
+	}
 	mounts := []apiv1.VolumeMount{
 		{
 			Name:      "chaincode",
@@ -276,7 +283,7 @@ func createBuilderPod(ctx context.Context, cfg Config, metadata *ChaincodeMetada
 						"-c", buildOpts.Cmd,
 					},
 					Env:          envvars,
-					Resources:    apiv1.ResourceRequirements{Limits: limits},
+					Resources:    apiv1.ResourceRequirements{Limits: limits, Requests: requests},
 					VolumeMounts: mounts,
 				},
 			},
