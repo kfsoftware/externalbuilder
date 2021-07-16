@@ -35,9 +35,9 @@ jobs:
             type=schedule
             type=ref,event=branch
             type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
+            type=semver,pattern=${{matrix.hlf-version}}-{{version}}
+            type=semver,pattern=${{matrix.hlf-version}}-{{major}}.{{minor}}
+            type=semver,pattern=${{matrix.hlf-version}}-{{major}}
             type=sha
       -
         name: Docker Login
