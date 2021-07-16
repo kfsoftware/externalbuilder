@@ -31,13 +31,15 @@ jobs:
           images: |
             quay.io/kfsoftware/fabric-peer
           # generate Docker tags based on the following events/attributes
+          flavor:
+            prefix=${{matrix.hlf-version}},onlatest=false
           tags: |
             type=schedule
             type=ref,event=branch
             type=ref,event=pr
-            type=semver,pattern=${{matrix.hlf-version}}-{{version}}
-            type=semver,pattern=${{matrix.hlf-version}}-{{major}}.{{minor}}
-            type=semver,pattern=${{matrix.hlf-version}}-{{major}}
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
             type=sha
       -
         name: Docker Login
