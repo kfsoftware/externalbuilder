@@ -40,13 +40,17 @@ func Run(ctx context.Context, cfg Config) error {
 	if err != nil {
 		return errors.Wrap(err, "getting run config for chaincode")
 	}
-
+	metadata, err := getMetadata(metadataDir)
+	if err != nil {
+		return errors.Wrap(err, "getting run config for chaincode")
+	}
 	// Create chaincode pod
 	pod, err := createChaincodePod(
 		ctx,
 		cfg,
 		runConfig,
 		buildID,
+		metadata,
 	)
 	if err != nil {
 		return errors.Wrap(err, "creating chaincode pod")
@@ -120,12 +124,7 @@ func getChaincodeRunConfig(metadataDir string, outputDir string) (*ChaincodeRunC
 	return &metadata, nil
 }
 
-func createChaincodePod(
-	ctx context.Context,
-	cfg Config,
-	runConfig *ChaincodeRunConfig,
-	buildID string,
-) (*apiv1.Pod, error) {
+func createChaincodePod(ctx context.Context, cfg Config, runConfig *ChaincodeRunConfig, buildID string, metadata *ChaincodeMetadata, ) (*apiv1.Pod, error) {
 
 	// Setup kubernetes client
 	clientset, err := getKubernetesClientset()
@@ -153,6 +152,19 @@ func createChaincodePod(
 		requests["memory"] = resource.MustParse(request)
 	}
 	if request := cfg.Launcher.Resources.RequestsCPU; request != "" {
+		requests["cpu"] = resource.MustParse(request)
+	}
+
+	if limit := metadata.Resources.LimitMemory; limit != "" {
+		limits["memory"] = resource.MustParse(limit)
+	}
+	if limit := metadata.Resources.LimitCPU; limit != "" {
+		limits["cpu"] = resource.MustParse(limit)
+	}
+	if request := metadata.Resources.RequestsMemory; request != "" {
+		requests["memory"] = resource.MustParse(request)
+	}
+	if request := metadata.Resources.RequestsCPU; request != "" {
 		requests["cpu"] = resource.MustParse(request)
 	}
 

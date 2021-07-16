@@ -298,7 +298,11 @@ func createBuilderPod(ctx context.Context, cfg Config, metadata *ChaincodeMetada
 						"-c",
 						//"sleep 600000",
 						fmt.Sprintf(
-							`cd /chaincode/output && tar cvf /chaincode/output.tar $(ls -A) && curl -X POST -s --upload-file /chaincode/output.tar '%s/chaincode-output.tar'`,
+							`
+cp -r ./chaincode/input/META-INF ./chaincode/output/ || echo "META-INF doesn't exist" &&
+cd /chaincode/output &&
+tar cvf /chaincode/output.tar $(ls -A) &&
+curl -X POST -s --upload-file /chaincode/output.tar '%s/chaincode-output.tar'`,
 							basePathURL,
 						),
 					},

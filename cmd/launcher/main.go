@@ -104,30 +104,27 @@ func getProcedureFromArg(procs map[string]Procedure) Procedure {
 	return nil
 }
 
+type ResourcesConfig struct {
+	LimitMemory    string `yaml:"memory_limit"`
+	LimitCPU       string `yaml:"cpu_limit"`
+	RequestsMemory string `yaml:"memory_requests"`
+	RequestsCPU    string `yaml:"cpu_requests"`
+}
+
 // Config defines the configuration for the Kubernetes chaincode builder and launcher
 type Config struct {
 	Images map[string]string `yaml:"images"` // map[technology]image
 
 	Builder struct {
-		Resources struct {
-			LimitMemory    string `yaml:"memory_limit"`
-			LimitCPU       string `yaml:"cpu_limit"`
-			RequestsMemory string `yaml:"memory_requests"`
-			RequestsCPU    string `yaml:"cpu_requests"`
-		} `yaml:"resources"`
-		Env []struct {
+		Resources ResourcesConfig `yaml:"resources"`
+		Env       []struct {
 			Name  string `yaml:"name"`
 			Value string `yaml:"value"`
 		} `yaml:"env"`
 	} `yaml:"builder"`
 
 	Launcher struct {
-		Resources struct {
-			LimitMemory    string `yaml:"memory_limit"`
-			LimitCPU       string `yaml:"cpu_limit"`
-			RequestsMemory string `yaml:"memory_requests"`
-			RequestsCPU    string `yaml:"cpu_requests"`
-		} `yaml:"resources"`
+		Resources ResourcesConfig `yaml:"resources"`
 	} `yaml:"launcher"`
 
 	// Internal configurations
@@ -147,6 +144,7 @@ type ChaincodeMetadata struct {
 	Path       string `json:"path"`
 	Label      string `json:"label"`
 	MetadataID string
+	Resources  ResourcesConfig `json:"resources"`
 }
 
 // ChaincodeRunConfig is based on

@@ -23,7 +23,7 @@ func Release(ctx context.Context, cfg Config) error {
 
 	sourceDir := os.Args[1]
 	outputDir := os.Args[2]
-
+	log.Printf("Source dir=%s Output Dir=%s \n", sourceDir, outputDir)
 	// Copy META-INF, if available
 	metaInf := filepath.Join(sourceDir, "META-INF")
 	if _, err := os.Stat(metaInf); !os.IsNotExist(err) {
