@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	cpy "github.com/otiai10/copy"
 	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
@@ -86,6 +87,15 @@ func Build(ctx context.Context, cfg Config) error {
 
 	if !podSucceeded {
 		return fmt.Errorf("build of Chaincode %s in Pod %s failed", metadata.Label, pod.Name)
+	}
+	transferSrcMeta := filepath.Join(sourceDir, "META-INF")
+
+	// Copy META-INF, if available
+	if _, err := os.Stat(transferSrcMeta); !os.IsNotExist(err) {
+		err = cpy.Copy(transferSrcMeta, outputDir)
+		if err != nil {
+			return errors.Wrap(err, "copy META-INF to output dir")
+		}
 	}
 
 	// Create build information
