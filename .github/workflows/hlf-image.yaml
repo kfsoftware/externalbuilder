@@ -32,7 +32,7 @@ jobs:
             quay.io/kfsoftware/fabric-peer
           # generate Docker tags based on the following events/attributes
           flavor:
-            prefix=${{matrix.hlf-version}},onlatest=false
+            prefix=${{matrix.hlf-version}}-,onlatest=false
           tags: |
             type=schedule
             type=ref,event=branch
