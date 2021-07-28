@@ -119,16 +119,25 @@ func getChaincodeRunConfig(metadataDir string, outputDir string) (*ChaincodeRunC
 	return &metadata, nil
 }
 
-func createChaincodePod(ctx context.Context, cfg Config, runConfig *ChaincodeRunConfig, buildID string ) (*apiv1.Pod, error) {
+func createChaincodePod(ctx context.Context, cfg Config, runConfig *ChaincodeRunConfig, buildID string) (*apiv1.Pod, error) {
 
 	// Setup kubernetes client
 	clientset, err := getKubernetesClientset()
 	if err != nil {
 		return nil, errors.Wrap(err, "getting kubernetes clientset")
 	}
-
-	// Get peer Pod
 	myself, _ := os.Hostname()
+	podname := fmt.Sprintf("%s-cc-%s", myself, runConfig.ShortName)
+	existingPod, err := clientset.CoreV1().Pods(cfg.Namespace).Get(ctx, podname, metav1.GetOptions{})
+	if err == nil {
+		log.Printf("Killing previous pod: %s/%s", existingPod.Namespace, existingPod.Name)
+		err = clientset.CoreV1().Pods(existingPod.Namespace).Delete(ctx, existingPod.Name, metav1.DeleteOptions{})
+		if err != nil {
+			log.Printf("Error killing previous pod %s/%s: %v", existingPod.Namespace, existingPod.Name, err)
+			return nil, err
+		}
+	}
+	// Get peer Pod
 	myselfPod, err := clientset.CoreV1().Pods(cfg.Namespace).Get(ctx, myself, metav1.GetOptions{})
 	if err != nil {
 		return nil, errors.Wrap(err, "getting myself Pod")
@@ -183,7 +192,6 @@ func createChaincodePod(ctx context.Context, cfg Config, runConfig *ChaincodeRun
 	}
 
 	// Pod
-	podname := fmt.Sprintf("%s-cc-%s", myself, runConfig.ShortName)
 	pod := &apiv1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: podname,

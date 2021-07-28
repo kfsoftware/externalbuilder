@@ -73,7 +73,7 @@ func Build(ctx context.Context, cfg Config) error {
 	}
 	log.Printf("File uploaded %d", resp.StatusCode)
 	// Create builder Pod
-	pod, err := createBuilderPod(ctx, cfg, metadata, basePathURL)
+	pod, err := createBuilderJob(ctx, cfg, metadata, basePathURL)
 	if err != nil {
 		return errors.Wrap(err, "creating builder pod")
 	}
@@ -170,7 +170,7 @@ func compress(src string, buf io.Writer) error {
 	return nil
 }
 
-func createBuilderPod(ctx context.Context, cfg Config, metadata *ChaincodeMetadata, basePathURL string) (*apiv1.Pod, error) {
+func createBuilderJob(ctx context.Context, cfg Config, metadata *ChaincodeMetadata, basePathURL string) (*apiv1.Pod, error) {
 	// Setup kubernetes client
 	clientset, err := getKubernetesClientset()
 	if err != nil {
