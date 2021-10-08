@@ -77,7 +77,6 @@ func Build(ctx context.Context, cfg Config) error {
 	if err != nil {
 		return errors.Wrap(err, "creating builder pod")
 	}
-	defer cleanupPodSilent(pod)
 
 	// Watch builder Pod for completion or failure
 	podSucceeded, err := watchPodUntilCompletion(ctx, pod)
@@ -119,6 +118,7 @@ func Build(ctx context.Context, cfg Config) error {
 	if err != nil {
 		return errors.Wrap(err, "changing permissions of BuildInformation")
 	}
+	cleanupPodSilent(pod)
 	return nil
 }
 
