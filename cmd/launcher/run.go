@@ -40,7 +40,6 @@ func Run(ctx context.Context, cfg Config) error {
 	if err != nil {
 		return errors.Wrap(err, "getting run config for chaincode")
 	}
-
 	// Create chaincode pod
 	pod, err := createChaincodePod(
 		ctx,
@@ -120,21 +119,25 @@ func getChaincodeRunConfig(metadataDir string, outputDir string) (*ChaincodeRunC
 	return &metadata, nil
 }
 
-func createChaincodePod(
-	ctx context.Context,
-	cfg Config,
-	runConfig *ChaincodeRunConfig,
-	buildID string,
-) (*apiv1.Pod, error) {
+func createChaincodePod(ctx context.Context, cfg Config, runConfig *ChaincodeRunConfig, buildID string) (*apiv1.Pod, error) {
 
 	// Setup kubernetes client
 	clientset, err := getKubernetesClientset()
 	if err != nil {
 		return nil, errors.Wrap(err, "getting kubernetes clientset")
 	}
-
-	// Get peer Pod
 	myself, _ := os.Hostname()
+	podname := fmt.Sprintf("%s-cc-%s", myself, runConfig.ShortName)
+	existingPod, err := clientset.CoreV1().Pods(cfg.Namespace).Get(ctx, podname, metav1.GetOptions{})
+	if err == nil {
+		log.Printf("Killing previous pod: %s/%s", existingPod.Namespace, existingPod.Name)
+		err = clientset.CoreV1().Pods(existingPod.Namespace).Delete(ctx, existingPod.Name, metav1.DeleteOptions{})
+		if err != nil {
+			log.Printf("Error killing previous pod %s/%s: %v", existingPod.Namespace, existingPod.Name, err)
+			return nil, err
+		}
+	}
+	// Get peer Pod
 	myselfPod, err := clientset.CoreV1().Pods(cfg.Namespace).Get(ctx, myself, metav1.GetOptions{})
 	if err != nil {
 		return nil, errors.Wrap(err, "getting myself Pod")
@@ -153,6 +156,19 @@ func createChaincodePod(
 		requests["memory"] = resource.MustParse(request)
 	}
 	if request := cfg.Launcher.Resources.RequestsCPU; request != "" {
+		requests["cpu"] = resource.MustParse(request)
+	}
+
+	if limit := runConfig.Resources.LimitMemory; limit != "" {
+		limits["memory"] = resource.MustParse(limit)
+	}
+	if limit := runConfig.Resources.LimitCPU; limit != "" {
+		limits["cpu"] = resource.MustParse(limit)
+	}
+	if request := runConfig.Resources.RequestsMemory; request != "" {
+		requests["memory"] = resource.MustParse(request)
+	}
+	if request := runConfig.Resources.RequestsCPU; request != "" {
 		requests["cpu"] = resource.MustParse(request)
 	}
 
@@ -176,7 +192,6 @@ func createChaincodePod(
 	}
 
 	// Pod
-	podname := fmt.Sprintf("%s-cc-%s", myself, runConfig.ShortName)
 	pod := &apiv1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: podname,

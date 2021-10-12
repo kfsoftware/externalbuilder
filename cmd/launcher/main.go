@@ -104,30 +104,27 @@ func getProcedureFromArg(procs map[string]Procedure) Procedure {
 	return nil
 }
 
+type ResourcesConfig struct {
+	LimitMemory    string `yaml:"memory_limit"`
+	LimitCPU       string `yaml:"cpu_limit"`
+	RequestsMemory string `yaml:"memory_requests"`
+	RequestsCPU    string `yaml:"cpu_requests"`
+}
+
 // Config defines the configuration for the Kubernetes chaincode builder and launcher
 type Config struct {
 	Images map[string]string `yaml:"images"` // map[technology]image
 
 	Builder struct {
-		Resources struct {
-			LimitMemory    string `yaml:"memory_limit"`
-			LimitCPU       string `yaml:"cpu_limit"`
-			RequestsMemory string `yaml:"memory_requests"`
-			RequestsCPU    string `yaml:"cpu_requests"`
-		} `yaml:"resources"`
-		Env []struct {
+		Resources ResourcesConfig `yaml:"resources"`
+		Env       []struct {
 			Name  string `yaml:"name"`
 			Value string `yaml:"value"`
 		} `yaml:"env"`
 	} `yaml:"builder"`
 
 	Launcher struct {
-		Resources struct {
-			LimitMemory    string `yaml:"memory_limit"`
-			LimitCPU       string `yaml:"cpu_limit"`
-			RequestsMemory string `yaml:"memory_requests"`
-			RequestsCPU    string `yaml:"cpu_requests"`
-		} `yaml:"resources"`
+		Resources ResourcesConfig `yaml:"resources"`
 	} `yaml:"launcher"`
 
 	// Internal configurations
@@ -147,17 +144,19 @@ type ChaincodeMetadata struct {
 	Path       string `json:"path"`
 	Label      string `json:"label"`
 	MetadataID string
+	Resources  ResourcesConfig `json:"resources"`
 }
 
 // ChaincodeRunConfig is based on
 // https://github.com/hyperledger/fabric/blob/v2.1.1/core/container/externalbuilder/externalbuilder.go#L335
 type ChaincodeRunConfig struct {
-	CCID        string `json:"chaincode_id"`
-	PeerAddress string `json:"peer_address"`
-	ClientCert  string `json:"client_cert"` // PEM encoded client certificate
-	ClientKey   string `json:"client_key"`  // PEM encoded client key
-	RootCert    string `json:"root_cert"`   // PEM encoded peer chaincode certificate
-	MSPID       string `json:"mspid"`
+	CCID        string          `json:"chaincode_id"`
+	PeerAddress string          `json:"peer_address"`
+	ClientCert  string          `json:"client_cert"` // PEM encoded client certificate
+	ClientKey   string          `json:"client_key"`  // PEM encoded client key
+	RootCert    string          `json:"root_cert"`   // PEM encoded peer chaincode certificate
+	MSPID       string          `json:"mspid"`
+	Resources   ResourcesConfig `json:"resources"`
 
 	// Custom fields
 	ShortName string
