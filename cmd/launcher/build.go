@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	cpy "github.com/otiai10/copy"
 	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
@@ -72,11 +73,10 @@ func Build(ctx context.Context, cfg Config) error {
 	}
 	log.Printf("File uploaded %d", resp.StatusCode)
 	// Create builder Pod
-	pod, err := createBuilderPod(ctx, cfg, metadata, basePathURL)
+	pod, err := createBuilderJob(ctx, cfg, metadata, basePathURL)
 	if err != nil {
 		return errors.Wrap(err, "creating builder pod")
 	}
-	defer cleanupPodSilent(pod)
 
 	// Watch builder Pod for completion or failure
 	podSucceeded, err := watchPodUntilCompletion(ctx, pod)
@@ -86,6 +86,15 @@ func Build(ctx context.Context, cfg Config) error {
 
 	if !podSucceeded {
 		return fmt.Errorf("build of Chaincode %s in Pod %s failed", metadata.Label, pod.Name)
+	}
+	transferSrcMeta := filepath.Join(sourceDir, "META-INF")
+
+	// Copy META-INF, if available
+	if _, err := os.Stat(transferSrcMeta); !os.IsNotExist(err) {
+		err = cpy.Copy(transferSrcMeta, outputDir)
+		if err != nil {
+			return errors.Wrap(err, "copy META-INF to output dir")
+		}
 	}
 
 	// Create build information
@@ -109,6 +118,7 @@ func Build(ctx context.Context, cfg Config) error {
 	if err != nil {
 		return errors.Wrap(err, "changing permissions of BuildInformation")
 	}
+	cleanupPodSilent(pod)
 	return nil
 }
 
@@ -160,7 +170,7 @@ func compress(src string, buf io.Writer) error {
 	return nil
 }
 
-func createBuilderPod(ctx context.Context, cfg Config, metadata *ChaincodeMetadata, basePathURL string) (*apiv1.Pod, error) {
+func createBuilderJob(ctx context.Context, cfg Config, metadata *ChaincodeMetadata, basePathURL string) (*apiv1.Pod, error) {
 	// Setup kubernetes client
 	clientset, err := getKubernetesClientset()
 	if err != nil {

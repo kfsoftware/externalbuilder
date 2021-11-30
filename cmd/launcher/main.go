@@ -150,12 +150,13 @@ type ChaincodeMetadata struct {
 // ChaincodeRunConfig is based on
 // https://github.com/hyperledger/fabric/blob/v2.1.1/core/container/externalbuilder/externalbuilder.go#L335
 type ChaincodeRunConfig struct {
-	CCID        string `json:"chaincode_id"`
-	PeerAddress string `json:"peer_address"`
-	ClientCert  string `json:"client_cert"` // PEM encoded client certificate
-	ClientKey   string `json:"client_key"`  // PEM encoded client key
-	RootCert    string `json:"root_cert"`   // PEM encoded peer chaincode certificate
-	MSPID       string `json:"mspid"`
+	CCID        string          `json:"chaincode_id"`
+	PeerAddress string          `json:"peer_address"`
+	ClientCert  string          `json:"client_cert"` // PEM encoded client certificate
+	ClientKey   string          `json:"client_key"`  // PEM encoded client key
+	RootCert    string          `json:"root_cert"`   // PEM encoded peer chaincode certificate
+	MSPID       string          `json:"mspid"`
+	Resources   ResourcesConfig `json:"resources"`
 
 	// Custom fields
 	ShortName string
