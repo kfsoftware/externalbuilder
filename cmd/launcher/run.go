@@ -120,7 +120,6 @@ func getChaincodeRunConfig(metadataDir string, outputDir string) (*ChaincodeRunC
 }
 
 func createChaincodePod(ctx context.Context, cfg Config, runConfig *ChaincodeRunConfig, buildID string) (*apiv1.Pod, error) {
-
 	// Setup kubernetes client
 	clientset, err := getKubernetesClientset()
 	if err != nil {
