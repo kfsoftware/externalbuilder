@@ -16,4 +16,4 @@ RUN ln -s /builders/golang/bin/externalcc /builders/golang/bin/build
 RUN ln -s /builders/golang/bin/externalcc /builders/golang/bin/release
 RUN ln -s /builders/golang/bin/externalcc /builders/golang/bin/run
 
-COPY images/fabric-peer/2.3.2/k8scc.yaml /builders/golang/bin/k8scc.yaml
+COPY images/fabric-peer/2.4.0/k8scc.yaml /builders/golang/bin/k8scc.yaml

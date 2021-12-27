@@ -1,8 +1,8 @@
 ---
 images:
-  golang: "hyperledger/fabric-ccenv:2.3.0"
-  java: "hyperledger/fabric-javaenv:2.3.0"
-  node: "hyperledger/fabric-nodeenv:2.3.0"
+  golang: "hyperledger/fabric-ccenv:2.3.2"
+  java: "hyperledger/fabric-javaenv:2.3.2"
+  node: "hyperledger/fabric-nodeenv:2.3.2"
 
 builder:
   resources:
