@@ -11,10 +11,12 @@ jobs:
     strategy:
       matrix:
         hlf-version:
-          - 2.2.0
-          - 2.2.3
-          - 2.3.0
-          - 2.3.2
+          - "2.2.0"
+          - "2.2.3"
+          - "2.3.0"
+          - "2.3.2"
+          - "2.4.0"
+          - "2.4.1"
     steps:
       -
         name: Checkout code
