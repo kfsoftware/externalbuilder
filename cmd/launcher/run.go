@@ -270,6 +270,10 @@ EOF_5
 							Value: runConfig.CCID,
 						},
 						{
+							Name:  "CORE_CHAINCODE_ID",
+							Value: runConfig.CCID,
+						},
+						{
 							Name:  "CORE_PEER_LOCALMSPID",
 							Value: runConfig.MSPID,
 						},
